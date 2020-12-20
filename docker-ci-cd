@@ -1,39 +1,26 @@
 node{
- stage('Git Checkout'){
-	git 'https://github.com/javahometech/my-app'  
- }
- stage('Maven Package'){
-	sh 'mvn clean package'
-	sh 'mv target/myweb*.war target/myweb.war'
- }
- 
- stage('Build Docker Imager'){
-   sh 'docker build -t kammana/myweb:0.0.1 .'
- }
- 
- stage('Push to Docker Hub'){
- 
-	 withCredentials([string(credentialsId: 'github-pwd', variable: 'dockerHubPwd')]) {
-        sh "docker login -u kammana -p ${dockerHubPwd}"
-     }
-	 sh 'docker push kammana/myweb:0.0.1'
- }
- stage('Remove Previous Container'){
-	try{
-		def dockerRm = 'docker rm -f myweb'
-		sshagent(['docker-dev']) {
-			sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.196 ${dockerRm}"
-		}
-	}catch(error){
-		//  do nothing if there is an exception
-	}
- }
- stage('Deploy to Dev Environment'){
-   def dockerRun = 'docker run -d -p 8080:8080 --name myweb kammana/myweb:0.0.1 '
-   sshagent(['docker-dev']) {
-    sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.17.196 ${dockerRun}"
+    stage('SCM Checkout'){
+       git credentialsId: 'abeb6fe1-4993-4bce-b78c-c839ab9d8e3d', url: 'https://github.com/akanksha-bansal/docker-maven-app'
    }
-
- }
-
+    stage('Mvn Package'){
+     def mvnHome = tool name: 'maven-3', type: 'maven'
+     def mvnCMD = "${mvnHome}/bin/mvn"
+     sh "${mvnCMD} clean package"
+   }
+    stage('Build Docker Image'){
+     sh 'docker build -t akankshabansal07/my-maven-app .'
+   }
+    stage('Push Docker Image'){
+     withCredentials([string(credentialsId: 'docker-pwd', variable: 'dockerHubPwd')])  {
+        sh "docker login -u akankshabansal07 -p ${dockerHubPwd}"
+     }
+     sh 'docker push akankshabansal07/my-maven-app'
+   }
+    stage('Run Container on Server'){
+     def dockerRun = 'docker run -p 8080:8080 -d --name my-maven-app akankshabansal07/my-maven-app'
+     sshagent(credentials: ['dev-server'], ignoreMissing: true) {
+       sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.30.202 ${dockerRun}"
+       sh "ssh -o"
+     }
+    }
 }
