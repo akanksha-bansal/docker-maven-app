@@ -2,7 +2,7 @@
 
 node{
   stage('Git Checkout'){
-      git url: 'https://github.com/javahometech/my-app',
+      git url: 'https://github.com/akanksha-bansal/docker-maven-app',
           branch:'master'
   }
   stage('MVN Package'){
