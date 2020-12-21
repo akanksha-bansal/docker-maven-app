@@ -1,5 +1,5 @@
 node{
-    stage('SCM Checkout'){
+    stage('Git Checkout'){
        git credentialsId: 'abeb6fe1-4993-4bce-b78c-c839ab9d8e3d', url: 'https://github.com/akanksha-bansal/docker-maven-app'
    }
     stage('Mvn Package'){
