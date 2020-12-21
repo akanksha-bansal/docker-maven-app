@@ -15,12 +15,8 @@ node{
         sh "docker login -u akankshabansal07 -p ${dockerHubPwd}"
      }
      sh 'docker push akankshabansal07/my-maven-app'
-   }
+        }
     stage('Run Container on Server'){
-     def dockerRun = 'docker run -p 8080:8080 -d --name my-maven-app akankshabansal07/my-maven-app'
-     sshagent(credentials: ['dev-server'], ignoreMissing: true) {
-       sh "ssh -o StrictHostKeyChecking=no ec2-user@172.31.30.202 ${dockerRun}"
-       sh "ssh -o"
-     }
+     sh 'docker run -p 8081:8080 -d -i --name my-maven-app akankshabansal07/my-maven-app'
     }
 }
